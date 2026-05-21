@@ -9,3 +9,11 @@ export interface LoginRequest {
   email: string;
   password: string;
 }
+
+export interface UserTokenPayload {
+  id: number;
+  name: string;
+  role: "contributor" | "maintainer";
+  iat?: number;
+  exp?: number;
+}

@@ -12,7 +12,16 @@ const signup = async (req: Request, res: Response) => {
 };
 
 const login = async (req: Request, res: Response) => {
-  const result = await authService.loginUser(req.body);
+  const { email, password } = req.body as { email?: string; password?: string };
+
+  if (!email || !password) {
+    return res.status(400).json({
+      success: false,
+      message: "Email and password are required",
+    });
+  }
+
+  const result = await authService.loginUser({ email, password });
 
   res.status(200).json({
     success: true,

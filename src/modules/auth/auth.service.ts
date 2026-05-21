@@ -30,6 +30,10 @@ const signupUser = async (payload: SignupRequest) => {
   return result.rows[0];
 };
 const loginUser = async (payload: LoginRequest) => {
+  if (!payload.email || !payload.password) {
+    throw new Error("Email and password are required");
+  }
+
   const result = await pool.query(`SELECT * FROM users WHERE email = $1`, [
     payload.email,
   ]);
