@@ -14,7 +14,6 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
   }
 
   const token = authHeader.slice(7).trim();
-  console.log("Received token:", token);
 
   try {
     const decoded = jwt.verify(token, config.jwtSecret);
