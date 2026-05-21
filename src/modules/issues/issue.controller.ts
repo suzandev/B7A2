@@ -127,9 +127,38 @@ const updateIssue = async (req: Request, res: Response) => {
   });
 };
 
+const deleteIssue = async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  if (user.role !== "maintainer") {
+    return res.status(403).json({ success: false, message: "Forbidden" });
+  }
+
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
+
+  const deleted = await issueService.deleteIssue(id);
+
+  if (!deleted) {
+    return res.status(404).json({ success: false, message: "Issue not found" });
+  }
+
+  return res
+    .status(200)
+    .json({ success: true, message: "Issue deleted successfully" });
+};
+
 export default {
   createIssue,
   getIssues,
   getIssue,
   updateIssue,
+  deleteIssue,
 };

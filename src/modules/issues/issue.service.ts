@@ -190,9 +190,16 @@ const updateIssue = async (id: number, payload: Partial<CreateIssue>) => {
   return getIssueById(id);
 };
 
+const deleteIssue = async (id: number) => {
+  const result = await pool.query(`DELETE FROM issues WHERE id = $1 RETURNING id`, [id]);
+
+  return result.rows.length > 0;
+};
+
 export default {
   createIssue,
   getIssues,
   getIssueById,
   updateIssue,
+  deleteIssue,
 };
