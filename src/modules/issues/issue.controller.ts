@@ -30,6 +30,40 @@ const createIssue = async (req: Request, res: Response) => {
   });
 };
 
+const getIssues = async (req: Request, res: Response) => {
+  const sort = req.query.sort === "oldest" ? "oldest" : "newest";
+  const type =
+    req.query.type === "bug" || req.query.type === "feature_request"
+      ? req.query.type
+      : undefined;
+  const status =
+    req.query.status === "open" ||
+    req.query.status === "in_progress" ||
+    req.query.status === "resolved"
+      ? req.query.status
+      : undefined;
+
+  const filters: import("../../types/issue.types").GetIssuesFilters = {
+    sort,
+  };
+
+  if (type) {
+    filters.type = type;
+  }
+
+  if (status) {
+    filters.status = status;
+  }
+
+  const issues = await issueService.getIssues(filters);
+
+  return res.status(200).json({
+    success: true,
+    data: issues,
+  });
+};
+
 export default {
   createIssue,
+  getIssues,
 };
