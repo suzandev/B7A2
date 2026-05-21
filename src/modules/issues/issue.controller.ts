@@ -63,7 +63,24 @@ const getIssues = async (req: Request, res: Response) => {
   });
 };
 
+const getIssue = async (req: Request, res: Response) => {
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
+
+  const issue = await issueService.getIssueById(id);
+
+  if (!issue) {
+    return res.status(404).json({ success: false, message: "Issue not found" });
+  }
+
+  return res.status(200).json({ success: true, data: issue });
+};
+
 export default {
   createIssue,
   getIssues,
+  getIssue,
 };

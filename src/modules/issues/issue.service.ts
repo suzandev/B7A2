@@ -100,7 +100,65 @@ const getIssues = async (filters: GetIssuesFilters = {}) => {
   }));
 };
 
+const getIssueById = async (id: number) => {
+  const issueResult = await pool.query<Issue>(
+    `
+    SELECT
+      id,
+      title,
+      description,
+      type,
+      status,
+      reporter_id,
+      created_at,
+      updated_at
+    FROM issues
+    WHERE id = $1
+    `,
+    [id],
+  );
+
+  const issue = issueResult.rows[0];
+
+  if (!issue) {
+    return null;
+  }
+
+  const reporterResult = await pool.query<{
+    id: number;
+    name: string;
+    role: "contributor" | "maintainer";
+  }>(
+    `
+    SELECT id, name, role
+    FROM users
+    WHERE id = $1
+    `,
+    [issue.reporter_id],
+  );
+
+  const reporter = reporterResult.rows[0] ?? {
+    id: issue.reporter_id,
+    name: "Unknown",
+    role: "contributor",
+  };
+
+  const result: IssueWithReporter = {
+    id: issue.id,
+    title: issue.title,
+    description: issue.description,
+    type: issue.type,
+    status: issue.status,
+    reporter,
+    created_at: issue.created_at,
+    updated_at: issue.updated_at,
+  };
+
+  return result;
+};
+
 export default {
   createIssue,
   getIssues,
+  getIssueById,
 };
