@@ -157,8 +157,42 @@ const getIssueById = async (id: number) => {
   return result;
 };
 
+const updateIssue = async (id: number, payload: Partial<CreateIssue>) => {
+  const fields: string[] = [];
+  const values: any[] = [];
+  let idx = 1;
+
+  if (payload.title !== undefined) {
+    fields.push(`title = $${idx++}`);
+    values.push(payload.title);
+  }
+
+  if (payload.description !== undefined) {
+    fields.push(`description = $${idx++}`);
+    values.push(payload.description);
+  }
+
+  if (payload.type !== undefined) {
+    fields.push(`type = $${idx++}`);
+    values.push(payload.type);
+  }
+
+  if (fields.length === 0) {
+    return getIssueById(id);
+  }
+
+  values.push(id);
+
+  const q = `UPDATE issues SET ${fields.join(", ")}, updated_at = CURRENT_TIMESTAMP WHERE id = $${idx} RETURNING id`;
+
+  await pool.query(q, values);
+
+  return getIssueById(id);
+};
+
 export default {
   createIssue,
   getIssues,
   getIssueById,
+  updateIssue,
 };

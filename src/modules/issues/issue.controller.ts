@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import issueService from "./issue.service";
-import type { CreateIssue } from "../../types/issue.types";
+import type { CreateIssue, UpdateIssueRequest } from "../../types/issue.types";
 
 const createIssue = async (req: Request, res: Response) => {
   const user = req.user;
@@ -79,8 +79,57 @@ const getIssue = async (req: Request, res: Response) => {
   return res.status(200).json({ success: true, data: issue });
 };
 
+const updateIssue = async (req: Request, res: Response) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ success: false, message: "Unauthorized" });
+  }
+
+  const id = Number(req.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    return res.status(400).json({ success: false, message: "Invalid id" });
+  }
+
+  const existing = await issueService.getIssueById(id);
+
+  if (!existing) {
+    return res.status(404).json({ success: false, message: "Issue not found" });
+  }
+
+  if (user.role !== "maintainer") {
+    // contributor
+    if (existing.reporter.id !== user.id) {
+      return res.status(403).json({ success: false, message: "Forbidden" });
+    }
+
+    if (existing.status !== "open") {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot modify issue unless status is open",
+      });
+    }
+  }
+
+  const payload: UpdateIssueRequest = {
+    title: req.body.title,
+    description: req.body.description,
+    type: req.body.type,
+  };
+
+  const updated = await issueService.updateIssue(id, payload);
+
+  return res.status(200).json({
+    success: true,
+    message: "Issue updated successfully",
+    data: updated,
+  });
+};
+
 export default {
   createIssue,
   getIssues,
   getIssue,
+  updateIssue,
 };

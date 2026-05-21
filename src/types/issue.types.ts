@@ -4,6 +4,12 @@ export interface CreateIssue {
   type: "bug" | "feature_request";
 }
 
+export interface UpdateIssueRequest {
+  title?: string;
+  description?: string;
+  type?: "bug" | "feature_request";
+}
+
 export interface Issue {
   id: number;
   title: string;
